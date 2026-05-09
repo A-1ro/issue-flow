@@ -1,0 +1,17 @@
+{
+  "name": "issue-flow",
+  "version": "0.1.0",
+  "description": "GitHub Issue を planner → implementer → reviewer の 4 段階サブエージェントで完了させ、PR を作成するまでをオーケストレートする Claude Code プラグイン。pnpm + gh CLI を前提。",
+  "author": {
+    "name": "Eiichiro Iriguchi"
+  },
+  "keywords": [
+    "github",
+    "issue",
+    "workflow",
+    "subagents",
+    "pnpm",
+    "gh",
+    "orchestration"
+  ]
+}

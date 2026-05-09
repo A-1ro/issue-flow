@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(gh pr create*)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/pre-pr-check.sh",
+            "statusMessage": "PR前チェック: format & lint を実行中...",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

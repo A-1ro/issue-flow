@@ -1,0 +1,36 @@
+# CLAUDE.md
+
+プロジェクト: my-app
+
+## 設計ドキュメント
+
+- 設計仕様: `docs/design.md`
+- 実装ステータス: `docs/implementation-status.md`（あれば）
+
+## Load-bearing rules
+
+issue-flow プラグインの planner / implementation-reviewer はこのセクションを読む。プロジェクトで譲れないアーキテクチャ上の決定を箇条書きで列挙する。
+
+1. **〇〇は内部化する**。並走実装を持ち込まない。
+2. **〇〇層は必ず経由する**。コアロジックから直接 〇〇 を呼ばない。
+3. **〇〇のエスケープハッチは塞がない**。
+
+## Non-goal
+
+- 〇〇 は対象外（理由: …）
+- 〇〇 は対象外（理由: …）
+
+## コマンド
+
+- `pnpm format` — フォーマット
+- `pnpm lint` — Lint
+- `pnpm typecheck` — 型チェック
+- `pnpm test` — テスト
+
+## ワークフロー
+
+1. Issue を読む
+2. 設計ドキュメントを確認
+3. 変更を最小スコープに保つ
+4. テストを書く
+5. PR を出す

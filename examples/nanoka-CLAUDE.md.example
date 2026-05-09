@@ -1,0 +1,104 @@
+# CLAUDE.md（フル例: Nanoka 風）
+
+issue-flow プラグインを使うプロジェクトの `CLAUDE.md` のフル例。`docs/<project>.md` という詳細設計仕様と、ステータス管理ファイルを併用するパターン。
+
+---
+
+# CLAUDE.md
+
+This file provides guidance to Claude Code when working with code in this repository.
+
+## Repository state
+
+このプロジェクトは Phase X 完了済み。pnpm workspace で:
+
+- `packages/<core>` — コアライブラリ
+- `packages/<cli>` — スキャフォールド CLI
+- `examples/<basic>` — サンプルアプリ
+
+着手前に必ず読む:
+
+- `docs/implementation-status.md` — 現在の shipped / pending split
+- `docs/<project>.md` — 製品 / アーキテクチャ設計
+- GitHub Issues — 残タスク・受容済みリスク・運用フォローアップ
+
+## Load-bearing architectural rules
+
+これは `docs/<project>.md` から派生した、変更不可の設計判断。ユーザーが明示的にプロジェクト方針を変えると言わない限り破らない。
+
+1. **〇〇は内部化する**（共存ではない）。エラーは <ライブラリ> の例外型、バリデータは <ライブラリ> 互換。
+2. **アダプタ層を最初から入れる**。`<具体的ランタイム型>` をコアパスに直接埋め込まない。
+3. **エスケープハッチを塞がない**。`app.db` での生 <ORM> アクセスは常に開けておく。
+4. **<API メソッド A> と <API メソッド B> は別メソッド**として残す。
+5. **<重要 API> の <パラメータ> は必須**（型エラーにする）。
+6. **<その他のクリティカルな決定>**
+
+## Phase boundaries and remaining scope
+
+すでに 1.x として shipped:
+
+- 機能 A
+- 機能 B
+
+残スコープ・将来候補:
+
+- 機能 C — Issue #N
+- 機能 D — Issue #M
+
+Non-goal:
+
+- 〇〇 は対象外（理由: …）
+- 〇〇 は対象外（理由: …）
+
+## Issue implementation workflow
+
+- 着手前に: Issue / 関連ファイルを Read してから書き始める
+- `package.json` を変更したら `pnpm install` でロックファイルを再生成
+- 着手前に `pnpm format` と `pnpm lint` をローカルで実行
+- 同じアプローチで 2 回失敗したら、止まって 2〜3 の代替案を提案
+
+## Skills & MCP locations
+
+- プラグイン skills は `/issue-flow:issue-next` などで起動
+- MCP config は `.mcp.json`
+
+## Workflow
+
+通常の実装作業:
+
+1. `docs/implementation-status.md` / `docs/<project>.md` / Issue / 該当ソースを読む
+2. shipped API か、tracked follow-up か、historical doc かを識別
+3. リクエストされたタスクのスコープ内に変更を留める
+4. テストをコードと同じ変更で更新
+5. 最小限の検証 → 必要に応じて広い検証
+6. 完了条件が満たされた後でのみ `docs/implementation-status.md` / GitHub Issue を更新
+
+## Versioning
+
+| 変更タイプ | バージョンセグメント |
+|---|---|
+| バグ修正、docs、template、test、tooling | patch `n.n.x` |
+| 新機能、新 API | minor `n.x.0` |
+| stable API への破壊的変更 | major `x.0.0` |
+
+迷ったら patch と minor の間は minor、minor と major の間は止まってユーザーに確認。
+
+## Security review triggers
+
+issue-flow の `security-reviewer` を呼ぶべきケース:
+
+- HTTP body / params / query / headers
+- バリデータ
+- DB クエリ構築・ORM エスケープハッチ・トランザクション
+- 認証・認可・セッション・トークン・API キー・シークレット
+- CORS・リダイレクト・外部 fetch・ロギング・エラーメッセージ
+- 新しい外部依存
+
+## Commands
+
+- `pnpm install` — 依存インストール
+- `pnpm build` — 全パッケージビルド
+- `pnpm -C packages/<core> test` — コアテスト
+- `pnpm -C packages/<core> typecheck` — コア型チェック
+- `pnpm format` — Biome / Prettier フォーマット
+- `pnpm lint` — Lint
