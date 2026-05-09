@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Pre-PR validation: run format and lint before allowing `gh pr create`.
-# Invoked by hooks/hooks.json on PreToolUse for Bash(gh pr create*).
+# Pre-PR validation: run format and lint before allowing PR creation.
+# Invoked by hooks/hooks.json on PreToolUse for mcp__github__create_pull_request.
 #
 # Exit non-zero blocks the PR creation. Plugin assumes pnpm-based workspace
 # with `format` and `lint` scripts at repo root. Override by setting

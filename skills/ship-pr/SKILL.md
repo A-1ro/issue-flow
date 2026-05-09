@@ -74,14 +74,11 @@ pnpm -C <package> test
    ```bash
    git push -u origin {ブランチ名}
    ```
-3. PR 作成（`Closes #{番号}` を body に含める）:
-   ```bash
-   gh pr create --title "..." --body "..."
-   ```
-4. PR URL をユーザーに伝える。
+3. PR 作成。GitHub MCP の `mcp__github__create_pull_request` を呼ぶ（`owner` / `repo` / `title` / `body` / `head: {ブランチ名}` / `base: main` を渡す）。`body` には `Closes #{番号}` を含める。
+4. 返却された PR URL をユーザーに見せる。
 
 ## ガードレール
 
 - Step で失敗したら自動で続行しない。エラーを提示してユーザーに対応を確認する。
 - format の自動修正以外のコード変更は行わない。lint/typecheck エラーを修正する場合は内容をユーザーに提示する。
-- **本プラグインの hooks（`gh pr create` 直前の format/lint）と重複するが、PR 作成前に明示実行することで早期にエラーを検知する。**
+- **本プラグインの hook（PreToolUse: `mcp__github__create_pull_request` → format & lint）が PR 作成直前にも走るため、本スキルの format/lint と二重実行になる。これは早期エラー検知のための意図的な冗長性。**

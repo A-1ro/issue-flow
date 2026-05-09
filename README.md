@@ -7,19 +7,17 @@ GitHub Issue を 1 件処理する Claude Code プラグイン。`planner → im
 | 種類 | 名前 | 用途 |
 |---|---|---|
 | Skill | `issue-flow:issue-next` | Issue 1 件を planner → implementer → review → PR まで自動進行 |
-| Skill | `issue-flow:issue-draft` | 実装前に「日本語コメントだけのドラフト PR」を挟むバリエーション |
 | Skill | `issue-flow:ship-pr` | format / lint / typecheck / test を順に走らせて PR を出す検証パイプライン |
 | Agent | `planner` | プラン策定（opus） |
 | Agent | `implementer` | 機械的な実装（haiku） |
 | Agent | `implementer-sonnet` | 型・generic が絡む複雑な実装（sonnet） |
 | Agent | `implementation-reviewer` | プラン・設計ドキュメントとの整合チェック（sonnet） |
 | Agent | `security-reviewer` | OWASP / 認証認可 / 機密情報の監査（opus） |
-| Hook | PreToolUse on `gh pr create*` | PR 作成直前に `pnpm format && pnpm lint` を強制実行 |
+| Hook | PreToolUse on `mcp__github__create_pull_request` | PR 作成直前に `pnpm format && pnpm lint` を強制実行 |
 
 ## 前提
 
-- **GitHub CLI** (`gh`) がインストール済み・認証済み
-- **GitHub MCP** が利用可能（`mcp__github__list_issues` / `mcp__github__get_issue` / `mcp__github__create_issue` / `mcp__github__add_issue_comment` / `mcp__github__create_pull_request`）
+- **GitHub MCP** が利用可能（`mcp__github__list_issues` / `mcp__github__get_issue` / `mcp__github__create_issue` / `mcp__github__add_issue_comment` / `mcp__github__create_pull_request`）— 全 PR / Issue 操作を MCP 経由で行うため `gh` CLI には依存しない
 - **pnpm** ベースのワークスペースで `pnpm format` / `pnpm lint` が定義されている（pnpm 以外の場合は環境変数で上書き可、後述）
 - プロジェクトルートに **`CLAUDE.md`** が置かれていることを推奨（load-bearing rules / 設計ドキュメントへのポインタを記述）
 
@@ -50,7 +48,6 @@ claude plugin install https://github.com/<owner>/issue-flow
 ```
 /issue-flow:issue-next 42         # Issue #42 を実装
 /issue-flow:issue-next             # Open Issue 一覧から候補を提示
-/issue-flow:issue-draft 42         # ドラフト PR 経由のフロー
 /issue-flow:ship-pr                # PR 前検証だけ単独実行
 ```
 
@@ -80,7 +77,7 @@ claude plugin install https://github.com/<owner>/issue-flow
 
 ## hook の挙動とカスタマイズ
 
-`gh pr create` を Bash 経由で呼ぶ直前に、プラグイン同梱の `scripts/pre-pr-check.sh` が走る。デフォルトは:
+`mcp__github__create_pull_request`（GitHub MCP の PR 作成ツール）が呼ばれる直前に、プラグイン同梱の `scripts/pre-pr-check.sh` が走る。`issue-next` `ship-pr` どちらの経路で PR を作っても hook が発火する。デフォルトは:
 
 ```bash
 pnpm format

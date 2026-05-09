@@ -202,7 +202,7 @@ Branch: {ブランチ名}
    ```
    - `package.json` を変更した場合は `pnpm install` を実行してロックファイルを更新し、コミットに含める。
    - lint / typecheck が通らない場合はエラーを修正してから次へ進む。
-   - **本プラグインの hooks（`gh pr create` 直前の format/lint）と重複するが、PR 作成前に明示実行することで早期にエラーを検知する。**
+   - **本プラグインの hook（PreToolUse: `mcp__github__create_pull_request` → format & lint）が PR 作成直前にも走るため、本ステップの実行は二重チェック。早期エラー検知のための意図的な冗長性。**
 6. **ユーザーに以下のサマリを 1 メッセージで提示し、PR を出していいか確認する**:
    ```
    ✅ #{Issue番号} {タイトル} 完了
