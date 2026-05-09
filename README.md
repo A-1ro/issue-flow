@@ -46,40 +46,47 @@ GitHub Issue を 1 件処理する Claude Code プラグイン。`planner → im
 
 本プラグインは Issue / PR 操作をすべて GitHub MCP 経由で行う。未追加なら以下で登録する。
 
-### 推奨: GitHub 公式ホスト型（OAuth）
+### 推奨: PAT 認証（公式ホスト型 + Personal Access Token）
+
+GitHub の公式ホスト MCP (`https://api.githubcopilot.com/mcp/`) は OAuth 2.0 dynamic client registration (RFC 7591) をサポートしていないため、Claude Code 側の OAuth フローが `SDK auth failed: Incompatible auth server: does not support dynamic client registration` で失敗する。**PAT を渡す方式が現状の回避策**。
+
+1. **PAT を作成** — https://github.com/settings/personal-access-tokens（fine-grained 推奨）
+   - スコープ: `Contents: read/write`, `Issues: read/write`, `Pull requests: read/write`, `Metadata: read`
+   - 対象リポジトリは利用するプロジェクトのみに絞ると安全
+2. **Claude Code に登録**:
+
+   ```bash
+   claude mcp add --transport http --scope user github https://api.githubcopilot.com/mcp/ \
+     --header "Authorization: Bearer ghp_YOUR_PAT_HERE"
+   ```
+
+   - `--scope user` は全プロジェクトで使えるグローバル登録（`~/.claude.json` に保存）
+   - 単一プロジェクトに閉じたい場合は `--scope project`（`.mcp.json` に記録、チーム共有可、ただし PAT を repo に commit しないよう注意 — env 経由推奨）に変更
+
+3. **動作確認**:
+
+   ```bash
+   claude mcp list           # 登録済み MCP 一覧
+   claude mcp get github     # 接続状態の詳細
+   ```
+
+   または Claude Code 内で `/mcp` パネルから接続状態を確認。
+
+### 既存登録を入れ替える場合
+
+```bash
+claude mcp remove github -s user            # 既存の壊れた登録を削除
+claude mcp add --transport http --scope user github https://api.githubcopilot.com/mcp/ \
+  --header "Authorization: Bearer ghp_YOUR_PAT_HERE"
+```
+
+### OAuth 方式（将来 GitHub が DCR 対応したら）
 
 ```bash
 claude mcp add --transport http --scope user github https://api.githubcopilot.com/mcp/
 ```
 
-- `--scope user` は全プロジェクトで使えるグローバル登録（`~/.claude.json` に保存）
-- 単一プロジェクトに閉じたい場合は `--scope project`（`.mcp.json` に記録、チーム共有可）に変更
-
-追加後、Claude Code 内で:
-
-```
-/mcp
-```
-
-ブラウザが開いて GitHub で認証 → スコープ承認。トークンは Claude Code が安全に保管・自動更新する。
-
-### 動作確認
-
-```bash
-claude mcp list           # 登録済み MCP 一覧
-claude mcp get github     # 接続状態の詳細
-```
-
-または Claude Code 内で `/mcp` パネルから接続状態を確認。
-
-### PAT 方式（OAuth が使えない環境）
-
-```bash
-claude mcp add --transport http --scope user github https://api.githubcopilot.com/mcp/ \
-  --header "Authorization: Bearer YOUR_GITHUB_PAT"
-```
-
-PAT に必要なスコープ: `repo` / `read:org`。
+追加後 `/mcp` でブラウザ認証。現時点では DCR 未対応で失敗するが、将来 GitHub 側がサポートしたらヘッダ不要になる。
 
 ## 使い方
 
