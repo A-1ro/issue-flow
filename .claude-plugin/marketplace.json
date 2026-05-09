@@ -6,7 +6,10 @@
   "plugins": [
     {
       "name": "issue-flow",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "A-1ro/issue-flow"
+      },
       "description": "GitHub Issue を planner → implementer → implementation-reviewer → security-reviewer の 4 段階サブエージェントで完了させ、PR 作成までをオーケストレートする Claude Code プラグイン。pnpm + GitHub MCP 前提。",
       "version": "0.1.0"
     }
