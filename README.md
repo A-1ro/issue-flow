@@ -35,13 +35,51 @@ GitHub Issue を 1 件処理する Claude Code プラグイン。`planner → im
 }
 ```
 
-### B. Git リポジトリから（推奨）
+### B. Marketplace 経由（推奨）
 
-```bash
-claude plugin install https://github.com/<owner>/issue-flow
+```
+/plugin marketplace add A-1ro/issue-flow
+/plugin install issue-flow@issue-flow-marketplace
 ```
 
-または `/plugin install` UI 経由。
+## GitHub MCP のセットアップ
+
+本プラグインは Issue / PR 操作をすべて GitHub MCP 経由で行う。未追加なら以下で登録する。
+
+### 推奨: GitHub 公式ホスト型（OAuth）
+
+```bash
+claude mcp add --transport http --scope user github https://api.githubcopilot.com/mcp/
+```
+
+- `--scope user` は全プロジェクトで使えるグローバル登録（`~/.claude.json` に保存）
+- 単一プロジェクトに閉じたい場合は `--scope project`（`.mcp.json` に記録、チーム共有可）に変更
+
+追加後、Claude Code 内で:
+
+```
+/mcp
+```
+
+ブラウザが開いて GitHub で認証 → スコープ承認。トークンは Claude Code が安全に保管・自動更新する。
+
+### 動作確認
+
+```bash
+claude mcp list           # 登録済み MCP 一覧
+claude mcp get github     # 接続状態の詳細
+```
+
+または Claude Code 内で `/mcp` パネルから接続状態を確認。
+
+### PAT 方式（OAuth が使えない環境）
+
+```bash
+claude mcp add --transport http --scope user github https://api.githubcopilot.com/mcp/ \
+  --header "Authorization: Bearer YOUR_GITHUB_PAT"
+```
+
+PAT に必要なスコープ: `repo` / `read:org`。
 
 ## 使い方
 
