@@ -20,6 +20,7 @@ GitHub Issue を 1 件処理する Claude Code プラグイン。`planner → im
 - **GitHub MCP** が利用可能（`mcp__github__list_issues` / `mcp__github__get_issue` / `mcp__github__create_issue` / `mcp__github__add_issue_comment` / `mcp__github__create_pull_request`）— 全 PR / Issue 操作を MCP 経由で行うため `gh` CLI には依存しない
 - **pnpm** ベースのワークスペースで `pnpm format` / `pnpm lint` が定義されている（pnpm 以外の場合は環境変数で上書き可、後述）
 - プロジェクトルートに **`CLAUDE.md`** が置かれていることを推奨（load-bearing rules / 設計ドキュメントへのポインタを記述）
+- HTML プレビューを開ける環境（macOS の `open` / Linux の `xdg-open` / WSL の `explorer.exe` など）。Tailwind CDN / mermaid CDN にアクセスできるネットワーク
 
 ## インストール
 
@@ -98,13 +99,21 @@ claude mcp add --transport http --scope user github https://api.githubcopilot.co
 
 `issue-next` の流れ:
 
-1. Issue を取得して内容を提示 → ユーザーが着手承認
-2. `planner` がプランを策定 → ユーザー承認
-3. プランファイル `.claude/plan/plan-{N}.md` を作成（中断時の復帰ポイント）
+1. Issue を取得して内容を提示 → ユーザーが着手承認（番号未指定時は Open Issue 候補を `.claude/plan/issue-list.html` で提示）
+2. `planner` がプランを策定
+3. プラン HTML `.claude/plan/plan-{N}.html` を生成して `open` でブラウザ表示 → ユーザー最終承認
+   - 単一 HTML / Tailwind CDN / mermaid 図 / `prefers-color-scheme` 自動切替
+   - `<!--PROGRESS_STATE ... PROGRESS_STATE-->` JSON コメントを埋め込み（実装中の進捗状態の単一の真実ソース、中断時の復帰ポイントを兼ねる）
+   - 3 秒ごとの自動リロードでリアルタイム進捗反映
 4. `implementer`（または `implementer-sonnet`）が実装
-5. `implementation-reviewer` がプラン・設計との整合をチェック
-6. 必要なら `security-reviewer` がセキュリティ監査
-7. format / lint / typecheck / test を実行 → PR 作成
+   - 各ステップ着手時 / 完了時に `PROGRESS_STATE` の `status` を `pending` → `in_progress` → `done` に Edit（バッチ更新禁止）
+   - オーケストレータが完了後に `git diff --stat` と整合性チェックし、ズレを直接同期
+5. `implementation-reviewer` がプラン・設計との整合をチェック → レビュー HTML `.claude/plan/review-impl-{N}.html` を生成して `open`
+6. 必要なら `security-reviewer` がセキュリティ監査 → `.claude/plan/review-security-{N}.html` を生成して `open`
+7. format / lint / typecheck / test を実行 → PR 前サマリ HTML `.claude/plan/pr-summary-{N}.html` で最終確認 → PR 作成
+8. 全 HTML をまとめて削除して終了
+
+ユーザーが画面で確認するもの（Issue 候補 / プラン / 各レビュー / PR 前サマリ）は **テキストでだらだら出さず、すべて単一 HTML として `.claude/plan/` に書き出して `open` でブラウザ表示する**のが本スキルの一貫した方針。
 
 ## プロジェクト側の設定
 

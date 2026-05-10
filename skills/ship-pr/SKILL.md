@@ -74,11 +74,28 @@ pnpm -C <package> test
    ```bash
    git push -u origin {ブランチ名}
    ```
-3. PR 作成。GitHub MCP の `mcp__github__create_pull_request` を呼ぶ（`owner` / `repo` / `title` / `body` / `head: {ブランチ名}` / `base: main` を渡す）。`body` には `Closes #{番号}` を含める。
-4. 返却された PR URL をユーザーに見せる。
+3. PR 作成は GitHub MCP サーバー (`mcp__github__create_pull_request`) を使用する。`gh pr create` などの CLI には依存しない。
+   - `owner` / `repo` は `git remote get-url origin` から取得する。
+   - `head` は現在のブランチ名（`git rev-parse --abbrev-ref HEAD`）。
+   - `base` は `main`（プロジェクトのデフォルトブランチが異なる場合は読み替える）。
+   - `title` は Conventional Commits 形式（例: `feat(scope): 概要 (#番号)`）。
+   - `body` には背景・変更点・テスト計画を記載し、`Closes #{番号}` を含める。
+4. ツール呼び出し例:
+   ```
+   mcp__github__create_pull_request({
+     owner: "<owner>",
+     repo: "<repo>",
+     base: "main",
+     head: "<ブランチ名>",
+     title: "<タイトル>",
+     body: "...\n\nCloses #<番号>"
+   })
+   ```
+5. 返却された PR URL をユーザーに見せる。
 
 ## ガードレール
 
 - Step で失敗したら自動で続行しない。エラーを提示してユーザーに対応を確認する。
 - format の自動修正以外のコード変更は行わない。lint/typecheck エラーを修正する場合は内容をユーザーに提示する。
+- PR 作成は必ず GitHub MCP サーバー経由で行い、`gh pr create` などの CLI には依存しない。MCP サーバーが使用不可の場合はその旨をユーザーに報告して停止する。
 - **本プラグインの hook（PreToolUse: `mcp__github__create_pull_request` → format & lint）が PR 作成直前にも走るため、本スキルの format/lint と二重実行になる。これは早期エラー検知のための意図的な冗長性。**
