@@ -1,6 +1,6 @@
 {
   "name": "issue-flow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "GitHub Issue を planner → implementer → reviewer の 4 段階サブエージェントで完了させ、PR を作成するまでをオーケストレートする Claude Code プラグイン。pnpm + GitHub MCP を前提。",
   "author": {
     "name": "Eiichiro Iriguchi"

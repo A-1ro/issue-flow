@@ -8,7 +8,7 @@
       "name": "issue-flow",
       "source": "./",
       "description": "GitHub Issue を planner → implementer → implementation-reviewer → security-reviewer の 4 段階サブエージェントで完了させ、PR 作成までをオーケストレートする Claude Code プラグイン。pnpm + GitHub MCP 前提。",
-      "version": "0.1.0"
+      "version": "0.2.0"
     }
   ]
 }
